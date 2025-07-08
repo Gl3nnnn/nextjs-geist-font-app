@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Space Invader Game</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.2/dist/tailwind.min.css" rel="stylesheet" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
+
+    body, html {
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(ellipse at center, #000010 0%, #000000 100%);
+      overflow: hidden;
+      height: 100%;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 500;
+      font-size: 3rem;
+      color: #00ffff;
+      text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff;
+      margin-bottom: 1rem;
+      animation: glow 2s ease-in-out infinite alternate;
+    }
+
+    #gameContainer {
+      background: radial-gradient(ellipse at center, #000011 0%, #000000 100%);
+      border: 4px solid #00ffff;
+      border-radius: 16px;
+      box-shadow: 0 0 30px #00ffff, 0 0 60px #00ffff inset;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 640px;
+    }
+
+    #gameCanvas {
+      background: black;
+      border-radius: 12px;
+      box-shadow: 0 0 20px #00ffff, 0 0 40px #00ffff inset;
+      width: 600px;
+      height: 400px;
+    }
+
+    .btn {
+      background: #00ffff;
+      color: black;
+      font-weight: bold;
+      padding: 0.5rem 1.5rem;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      margin: 0 0.5rem;
+      transition: background 0.3s ease;
+      box-shadow: 0 0 10px #00ffff;
+    }
+
+    .btn:hover, .btn:focus {
+      background: #00cccc;
+      outline: none;
+      box-shadow: 0 0 20px #00cccc;
+    }
+
+    #infoText {
+      margin-top: 1rem;
+      font-size: 1rem;
+      color: #00ffff;
+      text-align: center;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      text-shadow: 0 0 5px #00ffff;
+    }
+
+    @keyframes glow {
+      from {
+        text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff;
+      }
+      to {
+        text-shadow: 0 0 20px #00ffff, 0 0 40px #00ffff;
+      }
+    }
+  </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen text-white">
+  <h1 class="text-4xl font-bold mb-4">Space Invader Game</h1>
+  <div id="gameContainer">
+    <canvas id="gameCanvas" width="600" height="400" aria-label="Space Invader Game Canvas" role="img"></canvas>
+    <div class="mt-4 flex justify-center">
+      <button id="startBtn" class="btn">Start Game</button>
+      <button id="restartBtn" class="btn hidden">Restart Game</button>
+    </div>
+    <p id="infoText">Use arrow keys to move, spacebar to shoot.</p>
+    <div id="statusText" class="mt-4 text-center text-lg font-semibold text-cyan-400"></div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
