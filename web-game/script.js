@@ -33,14 +33,144 @@ let invaderSpeed = 1.5;
 let invaderDescend = 15;
 
 // Game state
+// Input state
 let rightPressed = false;
 let leftPressed = false;
 let spacePressed = false;
-let gameRunning = false;
+
 // Game state
 let score = 0;
 let level = 1;
+let lives = 3;
+let playerHealth = 100;
+let gameRunning = false;
+let gamePaused = false;
 let animationFrameId = null;
+
+// Invader bullets
+let invaderBullets = [];
+const invaderBulletWidth = 4;
+const invaderBulletHeight = 10;
+const invaderBulletSpeed = 4;
+
+// Sound effects
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function playBeep(frequency, duration) {
+  const oscillator = audioCtx.createOscillator();
+  const gainNode = audioCtx.createGain();
+  oscillator.connect(gainNode);
+  gainNode.connect(audioCtx.destination);
+  oscillator.type = 'square';
+  oscillator.frequency.value = frequency;
+  oscillator.start();
+  gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+  oscillator.stop(audioCtx.currentTime + duration / 1000);
+}
+
+// Update UI elements
+const livesDisplay = document.getElementById("livesDisplay");
+const healthDisplay = document.getElementById("healthDisplay");
+const statusText = document.getElementById("statusText");
+
+function updateUI() {
+  livesDisplay.textContent = "Lives: " + lives;
+  healthDisplay.textContent = "Health: " + playerHealth;
+  if (!gameRunning) {
+    statusText.textContent = "Game Over! Press Restart to play again.";
+  } else if (gamePaused) {
+    statusText.textContent = "Game Paused";
+  } else {
+    statusText.textContent = "";
+  }
+}
+
+// Invader shooting logic
+function invadersShoot() {
+  if (!gameRunning || gamePaused) return;
+  // Randomly select invaders to shoot
+  for (let r = 0; r < invaderRowCount; r++) {
+    for (let c = 0; c < invaderColumnCount; c++) {
+      const invader = invaders[r][c];
+      if (invader.status === 1 && Math.random() < 0.002) {
+        invaderBullets.push({
+          x: invader.x + invaderWidth / 2 - invaderBulletWidth / 2,
+          y: invader.y + invaderHeight,
+        });
+      }
+    }
+  }
+}
+
+// Draw invader bullets
+function drawInvaderBullets() {
+  ctx.fillStyle = "#ff4500";
+  ctx.shadowColor = "#ff4500";
+  ctx.shadowBlur = 10;
+  invaderBullets.forEach((bullet) => {
+    ctx.fillRect(bullet.x, bullet.y, invaderBulletWidth, invaderBulletHeight);
+  });
+  ctx.shadowBlur = 0;
+}
+
+// Move invader bullets
+function moveInvaderBullets() {
+  invaderBullets = invaderBullets.filter((bullet) => bullet.y < canvasHeight);
+  invaderBullets.forEach((bullet) => {
+    bullet.y += invaderBulletSpeed;
+  });
+}
+
+// Check collision between invader bullets and player
+function checkInvaderBulletCollision() {
+  invaderBullets.forEach((bullet, bIndex) => {
+    if (
+      bullet.x > playerX &&
+      bullet.x < playerX + playerWidth &&
+      bullet.y + invaderBulletHeight > playerY &&
+      bullet.y < playerY + playerHeight
+    ) {
+      invaderBullets.splice(bIndex, 1);
+      playerHealth -= 20;
+      playBeep(200, 100);
+      if (playerHealth <= 0) {
+        lives--;
+        playerHealth = 100;
+        if (lives <= 0) {
+          gameOver();
+        }
+      }
+    }
+  });
+}
+
+// Game over function
+function gameOver() {
+  gameRunning = false;
+  gamePaused = false;
+  cancelAnimationFrame(animationFrameId);
+  updateUI();
+}
+
+const pauseBtn = document.getElementById("pauseBtn");
+const resumeBtn = document.getElementById("resumeBtn");
+
+pauseBtn.addEventListener("click", () => {
+  if (!gameRunning || gamePaused) return;
+  gamePaused = true;
+  pauseBtn.classList.add("hidden");
+  resumeBtn.classList.remove("hidden");
+  updateUI();
+});
+
+resumeBtn.addEventListener("click", () => {
+  if (!gameRunning || !gamePaused) return;
+  gamePaused = false;
+  resumeBtn.classList.add("hidden");
+  pauseBtn.classList.remove("hidden");
+  updateUI();
+  gameLoop();
+});
 
 // Initialize invaders
 function initInvaders() {
@@ -238,6 +368,8 @@ function draw() {
 
 // Update game state
 function update() {
+  if (gamePaused || !gameRunning) return;
+
   if (rightPressed && playerX < canvasWidth - playerWidth) {
     playerX += playerSpeed;
   }
@@ -247,6 +379,13 @@ function update() {
   moveBullets();
   moveInvaders();
   collisionDetection();
+
+  invadersShoot();
+  moveInvaderBullets();
+  drawInvaderBullets();
+  checkInvaderBulletCollision();
+
+  updateUI();
 }
 
 // Game loop
